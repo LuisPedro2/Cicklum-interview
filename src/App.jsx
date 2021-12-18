@@ -50,6 +50,7 @@ export function App(){
             return;
         }
 
+        // add new item to the state and sort the result by total score first and order.
         setScores((scoresprev)=>{
           setOrder(order+1);
           return [...scoresprev,{homeTeam, scoreHT, awayTeam, scoreAT,totalScore,order}].sort((a,b)=>b['totalScore']-a['totalScore'] || b['order'] - a['order']);
