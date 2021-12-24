@@ -7,59 +7,61 @@
   pointer-events: none;
 }
 
-.Container {
+.container {
   text-align:center;
   padding:20px;
 }
 
-.Title{
+.title{
   font-size:60px;
   color:white;
 }
 
-.Subtitle{
+.subtitle{
   font-size:40px;
   color:white;
   text-align: center;
 }
 
-.ScoreInput{
+.scoreInput{
   margin:0 5px 0 5px;
   width:25px;
   height:25px;
 }
 
-.ScoreInput{
+.scoreInput{
   margin:0 5px 0 5px;
   width:25px;
   height:25px;
   text-align: center;
 }
 
-.TeamsInput{
+.teamsInput{
   width:250px;
   height:25px;
 }
 
-.InputsContainer {
+.inputsContainer {
   padding:0 0 20px 0;
 }
 
-.BotonStyle{
+.botonStyle{
+  display:block;
+  margin:20px auto;
   width:100px;
   height:35px;
   background:#e7dddb;
   cursor:pointer;
 }
 
-.Row{
+.row{
   text-align: center;
   text-Transform: uppercase;
   font-weight: bold;
   height:25px;
 }
 
-.Table{
+.table{
   border: #ccc solid 1px;
   border-radius: 10px;
   width: 400px;
@@ -68,7 +70,7 @@
   background-color:aliceblue;
 }
 
-.TableBox{
+.tableBox{
   display:flex;
   justify-content:center;  
 }

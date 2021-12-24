@@ -5,6 +5,8 @@ export function ScoreItem({score}) {
     
     const {homeTeam, scoreHT, awayTeam, scoreAT} = score;
     return (
-        <tr className="Row">{homeTeam} - {awayTeam}: {scoreHT} - {scoreAT}</tr>
+        <tr className="row">
+            <td>{homeTeam} - {awayTeam}: {scoreHT} - {scoreAT}</td>
+        </tr>
     )
 }

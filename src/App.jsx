@@ -1,16 +1,12 @@
 import './App.css';
-import React,{useState, Fragment,useRef, useEffect} from 'react';
+import React,{useState, Fragment, useEffect} from 'react';
+import { useForm } from "react-hook-form";
 import {ScoreList} from "./components/ScoreList";
 
 export function App(){
-  
-  const [scoresState, setScores] = useState([]);
-  const [order, setOrder] = useState(0);
 
-  const homeTeamRef = useRef();
-  const homeTeamScoreRef = useRef();
-  const awayTeamRef = useRef();
-  const awayTeamScoreRef = useRef();
+  const { register, handleSubmit, reset } = useForm();  
+  const [scoresState, setScores] = useState([]);
 
 
   useEffect(() => {    
@@ -23,65 +19,91 @@ export function App(){
 
     useEffect(()=>{
       localStorage.setItem('scores.storage',JSON.stringify(scoresState))
-    }, [scoresState]);  
+    }, [scoresState]);
+    
+    function formValidation(refs){
+      let msgError = "";
+      let refs_arr = [
+        refs['homeTeam'],
+        refs['awayTeam'],
+        refs['scoreHT'],
+        refs['scoreAT']
+      ];
 
-    function resetForm(){
-        homeTeamRef.current.value = "";
-        awayTeamRef.current.value = "";
-        homeTeamScoreRef.current.value = "";
-        awayTeamScoreRef.current.value = "";
-    }
+      const re = /^[0-9\b]+$/;
 
-    const handleAddScore = () => {
-        const homeTeam = homeTeamRef.current.value;
-        const awayTeam = awayTeamRef.current.value;
-        const scoreHT = homeTeamScoreRef.current.value;
-        const scoreAT = awayTeamScoreRef.current.value;
+      if(refs_arr.some(ref=>!ref)){
+        if(refs['homeTeam']===''){
+          msgError +="- Home team field is required\n"
+        }
+        if(refs['awayTeam']===''){
+          msgError +="- Away team field is required\n"
+        }
+        if(refs['scoreHT']===''){
+          msgError +="- Home team score field is required\n"
+        }
+        if(refs['scoreAT']===''){
+          msgError +="- Away team score field is required\n"
+        }  
         
+      }else if(refs['homeTeam'].toLowerCase() === refs['awayTeam'].toLowerCase()){
+        msgError +="- Home team and away team must to be differents\n"
+      }else if(!re.test(refs['scoreHT']) || !re.test(refs['scoreAT'])){
+        msgError +="- Scores must be an integer number\n"
+      }
+
+      if(msgError!==''){
+        alert(msgError);
+        return false;
+      }
+      return true;
+    }
+      
+
+    const onSubmit = (refs) => {
+
+      if(formValidation(refs)){
+        const homeTeam = refs['homeTeam'];
+        const awayTeam = refs['awayTeam'];
+        const scoreHT = refs['scoreHT'];
+        const scoreAT = refs['scoreAT'];
+        const order = Date.now();
+
         const totalScore = parseInt(scoreHT) + parseInt(scoreAT);
 
-        if(homeTeam === "" || awayTeam === "" || scoreHT === "" || scoreAT === ""){
-            alert("Populate all the fields, please");
-            return;
-        }
-        const re = /^[0-9\b]+$/;
-        if(!re.test(scoreHT) || !re.test(scoreAT)){
-          alert("Score must be a number");
-            return;
-        }
-
         // add new item to the state and sort the result by total score first and order.
-        setScores((scoresprev)=>{
-          setOrder(order+1);
-          return [...scoresprev,{homeTeam, scoreHT, awayTeam, scoreAT,totalScore,order}].sort((a,b)=>b['totalScore']-a['totalScore'] || b['order'] - a['order']);
+        setScores((scoresPrev)=>{
+          return [...scoresPrev,{homeTeam, scoreHT, awayTeam, scoreAT,totalScore,order}].sort((a,b)=>b['totalScore']-a['totalScore'] || b['order'] - a['order']);
         });
 
-        resetForm();
+        reset();
+      }
+      
 
     }
 
     return (
       <Fragment>
-        <div className="Container">
+        <div className="container">
           <div>
-            <h1 className="Title">World Cup Analisys Board</h1>
+            <h1 className="title">World Cup Analisys Board</h1>
           </div>
           <div>
-            <div className="InputsContainer">
-                <input  id="hometeam" className="TeamsInput" ref={homeTeamRef} type="text" placeholder="Home Team"/>
-                <input  id="hometeamscore" className="ScoreInput" ref={homeTeamScoreRef} type="text" placeholder="-"/>
+          <form onSubmit={handleSubmit(onSubmit)} className="inputsContainer">
+                <input  {...register("homeTeam")} className="teamsInput" type="text" placeholder="Home Team"/>
+                <input  {...register("scoreHT")} className="scoreInput" type="text" placeholder="-"/>
                 <span> - </span>
-                <input  id="awayteamscore" className="ScoreInput" ref={awayTeamScoreRef} type="text" placeholder="-"/>       
-                <input  id="awayteams" className="TeamsInput" ref={awayTeamRef} type="text" placeholder="Away Team" placeholder="Away Team"/>       
-            </div>          
-            <button name="addbutton" className="BotonStyle" onClick={handleAddScore}>Add Score</button>
+                <input  {...register("scoreAT")} className="scoreInput" type="text" placeholder="-"/>       
+                <input  {...register("awayTeam")} className="teamsInput" type="text" placeholder="Away Team"/>
+                <input className="botonStyle" type="submit" value="Add score"/>
+            </form>     
           </div>
         </div>
         {
-          scoresState.length >0 ?
-          <ScoreList scores={scoresState}/>
-          :
-          <h2 className="Subtitle">Add a score</h2>
+          scoresState.length > 0 ?
+            <ScoreList scores={scoresState}/>
+            :
+            <h2 className="subtitle">Add a score</h2>
         }
       </Fragment>
     )   

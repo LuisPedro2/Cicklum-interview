@@ -5,11 +5,11 @@ import {ScoreItem} from "./ScoreItem";
 export function ScoreList({scores}) {
 
     return (
-        <div className="TableBox">
-            <table className="Table">
+        <div className="tableBox">
+            <table className="table">
                 <tbody>
                     {scores.map((score)=>(
-                        <ScoreItem  score={score}/>
+                        <ScoreItem  key={score.order} score={score}/>
                     ))}
                 </tbody>
             </table>
