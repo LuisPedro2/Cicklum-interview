@@ -2,12 +2,15 @@ import './App.css';
 import React,{useState, Fragment, useEffect} from 'react';
 import { useForm } from "react-hook-form";
 import {ScoreList} from "./components/ScoreList";
+import { ErrorMessage } from '@hookform/error-message';
 
 export function App(){
 
-  const { register, handleSubmit, reset } = useForm();  
+  const { register, handleSubmit, reset, formState: { errors }} = useForm({
+    criteriaMode: "all"
+  });
   const [scoresState, setScores] = useState([]);
-
+  
 
   useEffect(() => {    
     const storedScores = localStorage.getItem('scores.storage');
@@ -19,67 +22,27 @@ export function App(){
 
     useEffect(()=>{
       localStorage.setItem('scores.storage',JSON.stringify(scoresState))
-    }, [scoresState]);
-    
-    function formValidation(refs){
-      let msgError = "";
-      let refs_arr = [
-        refs['homeTeam'],
-        refs['awayTeam'],
-        refs['scoreHT'],
-        refs['scoreAT']
-      ];
-
-      const re = /^[0-9\b]+$/;
-
-      if(refs_arr.some(ref=>!ref)){
-        if(refs['homeTeam']===''){
-          msgError +="- Home team field is required\n"
-        }
-        if(refs['awayTeam']===''){
-          msgError +="- Away team field is required\n"
-        }
-        if(refs['scoreHT']===''){
-          msgError +="- Home team score field is required\n"
-        }
-        if(refs['scoreAT']===''){
-          msgError +="- Away team score field is required\n"
-        }  
-        
-      }else if(refs['homeTeam'].toLowerCase() === refs['awayTeam'].toLowerCase()){
-        msgError +="- Home team and away team must to be differents\n"
-      }else if(!re.test(refs['scoreHT']) || !re.test(refs['scoreAT'])){
-        msgError +="- Scores must be an integer number\n"
-      }
-
-      if(msgError!==''){
-        alert(msgError);
-        return false;
-      }
-      return true;
-    }
-      
+    }, [scoresState]);      
 
     const onSubmit = (refs) => {
+     
+      const homeTeam = refs['homeTeam'];
+      const awayTeam = refs['awayTeam'];
+      const scoreHT = refs['scoreHT'];
+      const scoreAT = refs['scoreAT'];
+      const order = Date.now();
+      const totalScore = parseInt(scoreHT) + parseInt(scoreAT);
 
-      if(formValidation(refs)){
-        const homeTeam = refs['homeTeam'];
-        const awayTeam = refs['awayTeam'];
-        const scoreHT = refs['scoreHT'];
-        const scoreAT = refs['scoreAT'];
-        const order = Date.now();
-
-        const totalScore = parseInt(scoreHT) + parseInt(scoreAT);
-
+      if(homeTeam.toLowerCase() === awayTeam.toLowerCase()){
+        alert(homeTeam.toUpperCase()+" can´t play against themselves, please correct it");
+        return;
+      }
+     
         // add new item to the state and sort the result by total score first and order.
         setScores((scoresPrev)=>{
           return [...scoresPrev,{homeTeam, scoreHT, awayTeam, scoreAT,totalScore,order}].sort((a,b)=>b['totalScore']-a['totalScore'] || b['order'] - a['order']);
         });
-
         reset();
-      }
-      
-
     }
 
     return (
@@ -90,13 +53,47 @@ export function App(){
           </div>
           <div>
           <form onSubmit={handleSubmit(onSubmit)} className="inputsContainer">
-                <input  {...register("homeTeam")} className="teamsInput" type="text" placeholder="Home Team"/>
-                <input  {...register("scoreHT")} className="scoreInput" type="text" placeholder="-"/>
+                <input  {...register("homeTeam",{required:'- Home team field is required'})} className="teamsInput" type="text" placeholder="Home Team"/>
+                <input  {...register("scoreHT",
+                  {required:'- Home team score field is required',
+                  pattern:{value:/^[0-9\b]+$/, message:"- Home team score must be an integer number"}})} className="scoreInput" type="text" placeholder="-"/>
                 <span> - </span>
-                <input  {...register("scoreAT")} className="scoreInput" type="text" placeholder="-"/>       
-                <input  {...register("awayTeam")} className="teamsInput" type="text" placeholder="Away Team"/>
-                <input className="botonStyle" type="submit" value="Add score"/>
-            </form>     
+                <input  {...register("scoreAT",
+                  {required:'- Away team score field is required',
+                  pattern:{value:/^[0-9\b]+$/, message:"- Away team score must be an integer number"}})} className="scoreInput" type="text" placeholder="-"/>
+                <input  {...register("awayTeam",{required:'- Away team field is required'})} className="teamsInput" type="text" placeholder="Away Team"/>
+                <input className="botonStyle" type="submit" value="Add score"/>  
+            </form>
+            <ErrorMessage
+                  errors={errors}
+                  name="homeTeam"
+                  render={({ message }) => <p className="errorMessage">{message}</p>}
+                />
+                <ErrorMessage
+                  errors={errors}
+                  name="scoreHT"
+                  render={({ messages }) =>
+                    messages &&
+                    Object.entries(messages).map(([type, message]) => (
+                      <p className="errorMessage">{message}</p>
+                    ))
+                  }
+                />
+                <ErrorMessage
+                  errors={errors}
+                  name="scoreAT"
+                  render={({ message }) => <p className="errorMessage">{message}</p>}
+                />
+                <ErrorMessage
+                  errors={errors}
+                  name="awayTeam"
+                  render={({ messages }) =>
+                    messages &&
+                    Object.entries(messages).map(([type, message]) => (
+                      <p className="errorMessage">{message}</p>
+                    ))
+                  }
+                />
           </div>
         </div>
         {
